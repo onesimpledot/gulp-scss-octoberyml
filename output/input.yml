@@ -1,4 +1,2 @@
-test: hi
-test2:
-  - color: red
-    name: farbe
+test-var:
+  test: hi
