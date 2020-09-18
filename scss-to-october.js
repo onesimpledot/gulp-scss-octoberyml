@@ -1,50 +1,62 @@
 const through2 = require('through2');
 const Path = require('path');
+const Stream = require('stream');
+
 const yaml = require('js-yaml');
 var rgbRegex = require('rgb-regex');
 var hexRegex = require('hex-color-regex');
 
-const scssToOctoberYml = through2.obj(function (file, _, cb) {
-    if (file.isBuffer()) {
-        file.path = Path.basename(file.path, ".scss") + ".yml"; //change path ext to .yml
+function scssToOctoberYml(obj, options) {
+    options = options || {};
 
-        //split scss file into lines, only lines including octoberyml: {} will be converted to a configuration option
-        const lines = file.contents.toString().split(/(?:\r\n|\r|\n)/g);
+    var stream = new Stream.Transform({ objectMode: true });
 
-        var commentPattern = / {0,}\$(.{1,})\: {0,}(.{1,}) {0,}; {0,}\/{2} {0,}octoberyml: {0,}(\{ {0,}.{0,} {0,}\})/i;
+    stream._transform = function (originalFile, _, callback) {
+        var file = originalFile.clone({ contents: false });
 
-        let variables = {};
+        if (file.isBuffer()) {
+            file.path = Path.basename(file.path, ".scss") + ".yml"; //change path ext to .yml
 
-        for (const line of lines) {
-            var match = line.match(commentPattern);
-            if (match != null) {
-                const variableName = match[1];
-                const sanatizedVariableName = variableName.replace("-", "_");
-                const defaultValue = match[2];
-                let options = {};
-                if (isColor(defaultValue)) {
-                    options.type = "colorpicker";
+            //split scss file into lines, only lines including octoberyml: {} will be converted to a configuration option
+            const lines = file.contents.toString().split(/(?:\r\n|\r|\n)/g);
+
+            var commentPattern = / {0,}\$(.{1,})\: {0,}(.{1,}) {0,}; {0,}\/{2} {0,}octoberyml: {0,}(\{ {0,}.{0,} {0,}\})/i;
+
+            let variables = {};
+
+            for (const line of lines) {
+                var match = line.match(commentPattern);
+                if (match != null) {
+                    const variableName = match[1];
+                    const sanatizedVariableName = variableName.replace("-", "_");
+                    const defaultValue = match[2];
+                    let options = {};
+                    if (isColor(defaultValue)) {
+                        options.type = "colorpicker";
+                    }
+                    try {
+                        options = { ...looseJsonParse(match[3]), ...options };
+                    } catch (e) {
+                        throw new Error("invalid options string: " + options);
+                    }
+                    variables[sanatizedVariableName] = { default: defaultValue, assetVar: variableName, ...options };
                 }
-                try {
-                    options = { ...looseJsonParse(match[3]), ...options };
-                } catch (e) {
-                    throw new Error("invalid options string: " + options);
-                }
-                variables[sanatizedVariableName] = { default: defaultValue, assetVar: variableName, ...options };
             }
-        }
 
-        //dump 
-        file.contents = Buffer.from(yaml.safeDump(variables, {
-            'styles': {
-                '!!null': 'canonical' // dump null as ~
-            },
-        }));
-        console.log("\n### OUTPUT ###\n");
-        console.log(file.contents.toString());
+            //dump 
+            file.contents = Buffer.from(yaml.safeDump(variables, {
+                'styles': {
+                    '!!null': 'canonical' // dump null as ~
+                },
+            }));
+            console.log("\n### OUTPUT ###\n");
+            console.log(file.contents.toString());
+        }
+        callback(null, file);
     }
-    cb(null, file);
-});
+
+    return stream;
+}
 
 
 //from https://developer.mozilla.org/
