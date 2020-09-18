@@ -1,6 +1,8 @@
 const through2 = require('through2');
 const Path = require('path');
 const yaml = require('js-yaml');
+var rgbRegex = require('rgb-regex');
+var hexRegex = require('hex-color-regex');
 
 const scssToOctoberYml = through2.obj(function (file, _, cb) {
     if (file.isBuffer()) {
@@ -19,9 +21,12 @@ const scssToOctoberYml = through2.obj(function (file, _, cb) {
                 const variableName = match[1];
                 const sanatizedVariableName = variableName.replace("-", "_");
                 const defaultValue = match[2];
-                let options;
+                let options = {};
+                if (isColor(defaultValue)) {
+                    options.type = "colorpicker";
+                }
                 try {
-                    options = looseJsonParse(match[3]);
+                    options = { ...looseJsonParse(match[3]), ...options };
                 } catch (e) {
                     throw new Error("invalid options string: " + options);
                 }
@@ -45,6 +50,10 @@ const scssToOctoberYml = through2.obj(function (file, _, cb) {
 //from https://developer.mozilla.org/
 function looseJsonParse(obj) {
     return Function('"use strict";return (' + obj + ')')(); //@reviewer, don't use Function? alternative would be JSON.parse()
+}
+
+function isColor(strColor) {
+    return rgbRegex({ exact: true }).test(strColor) || hexRegex({ exact: true }).test(strColor);
 }
 
 module.exports = scssToOctoberYml;
