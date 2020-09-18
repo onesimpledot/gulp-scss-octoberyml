@@ -1,10 +1,9 @@
-const through2 = require('through2');
-const Path = require('path');
 const Stream = require('stream');
-
+const Path = require('path');
 const yaml = require('js-yaml');
-var rgbRegex = require('rgb-regex');
-var hexRegex = require('hex-color-regex');
+
+const rgbRegex = require('rgb-regex');
+const hexRegex = require('hex-color-regex');
 
 function scssToOctoberYml(obj, options) {
     options = options || {};
