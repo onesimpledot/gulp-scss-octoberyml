@@ -1,12 +1,11 @@
-import Stream from "stream";
-import Path from "path";
-import yaml from "js-yaml";
+import * as Stream from "readable-stream";
+import * as Path from "path";
+import * as yaml from "js-yaml";
 
-import rgbRegex from "rgb-regex";
-import hexRegex from "hex-color-regex";
+import * as rgbRegex from "rgb-regex";
+import * as hexRegex from "hex-color-regex";
 
-function scssToOctoberYml(obj, options) {
-    options = options || {};
+function scssToOctoberYml() {
 
     var stream = new Stream.Transform({ objectMode: true });
 
@@ -29,7 +28,7 @@ function scssToOctoberYml(obj, options) {
                     const variableName = match[1];
                     const sanatizedVariableName = variableName.replace("-", "_");
                     const defaultValue = match[2];
-                    let options = {};
+                    let options: any = {};
                     if (isColor(defaultValue)) {
                         options.type = "colorpicker";
                     }
@@ -67,4 +66,4 @@ function isColor(strColor) {
     return rgbRegex({ exact: true }).test(strColor) || hexRegex({ exact: true }).test(strColor);
 }
 
-export { scssToOctoberYml};
+export { scssToOctoberYml };

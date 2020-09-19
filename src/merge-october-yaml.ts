@@ -1,8 +1,8 @@
-const Stream = require('stream');
-const yaml = require('js-yaml');
-var fs = require('fs');
+import * as Stream from "readable-stream";
+import * as yaml from "js-yaml";
+import * as fs from "fs";
 
-function scssToOctoberYml(obj) {
+function mergeOctoberFormFields(obj) {
     if (!obj) throw new Error("Argument required");
 
     var stream = new Stream.Transform({ objectMode: true });
@@ -14,7 +14,7 @@ function scssToOctoberYml(obj) {
 
             const input = yaml.load(file.contents.toString());
 
-            const toMerge = yaml.load(fs.readFileSync(obj))
+            const toMerge = yaml.load(fs.readFileSync(obj).toString());
 
             input.form = {};
             input.form.fields = {};
@@ -35,4 +35,4 @@ function scssToOctoberYml(obj) {
 
     return stream;
 }
-export { scssToOctoberYml };
+export { mergeOctoberFormFields };
