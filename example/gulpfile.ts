@@ -1,6 +1,6 @@
-const { src, dest, series } = require("gulp");
-const scssToOctober = require('../src/scss-to-october');
-const mergeOctoberYaml = require("../src/merge-october-yaml");
+import { src, dest, series } from "gulp"; 
+import { scssToOctober } from "../src/scss-to-october"; 
+import { mergeOctoberYaml } from "../src/merge-october-yaml"; 
 
 function buildExampleYmlFromScss() {
   return src('example.scss')

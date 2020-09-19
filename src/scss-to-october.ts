@@ -1,9 +1,9 @@
-const Stream = require('stream');
-const Path = require('path');
-const yaml = require('js-yaml');
+import Stream from "stream";
+import Path from "path";
+import yaml from "js-yaml";
 
-const rgbRegex = require('rgb-regex');
-const hexRegex = require('hex-color-regex');
+import rgbRegex from "rgb-regex";
+import hexRegex from "hex-color-regex";
 
 function scssToOctoberYml(obj, options) {
     options = options || {};
@@ -67,4 +67,4 @@ function isColor(strColor) {
     return rgbRegex({ exact: true }).test(strColor) || hexRegex({ exact: true }).test(strColor);
 }
 
-module.exports = scssToOctoberYml;
+export { scssToOctoberYml};

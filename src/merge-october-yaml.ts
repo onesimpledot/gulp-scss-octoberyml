@@ -35,5 +35,4 @@ function scssToOctoberYml(obj) {
 
     return stream;
 }
-
-module.exports = scssToOctoberYml;
+export { scssToOctoberYml };
